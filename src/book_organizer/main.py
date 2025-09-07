@@ -266,9 +266,14 @@ class BookOrganizer:
                     if dir_path.exists() and not any(dir_path.iterdir()):
                         dir_path.rmdir()
                 except OSError as cleanup_error:
-                    # クリーンアップ失敗は元のエラーより重要度が低いため、
-                    # 詳細をログに残すが処理は継続
-                    print(f"⚠️  クリーンアップ失敗: {dir_path} - {cleanup_error}")
+                    # クリーンアップ失敗時はユーザーに対処方法を案内
+                    print(f"⚠️  空のディレクトリを削除できませんでした: {dir_path}")
+                    print(f"    原因: {cleanup_error}")
+                    print("    対処法:")
+                    print("      1. ファイルマネージャーで手動削除")
+                    print(f"      2. ターミナル: rm -rf '{dir_path}' (Mac/Linux)")
+                    print(f"      3. コマンドプロンプト: rmdir /s '{dir_path}' (Windows)")
+                    print("    注意: このディレクトリが残っていても次回実行には影響ありません")
             return False
 
     def run(self) -> bool:
