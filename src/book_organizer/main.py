@@ -21,11 +21,12 @@ class BookOrganizer:
     
     SUPPORTED_EXTENSIONS = {'.jpg', '.jpeg', '.png'}
     
-    def __init__(self, target_dir: str, dry_run: bool = False, auto: bool = False, create_cbz: bool = False):
+    def __init__(self, target_dir: str, dry_run: bool = False, auto: bool = False, create_cbz: bool = False, magazine_mode: bool = False):
         self.target_dir = Path(target_dir).resolve()
         self.dry_run = dry_run
         self.auto = auto
         self.create_cbz = create_cbz
+        self.magazine_mode = magazine_mode
         self.title = self.target_dir.name
         
     def analyze_files(self) -> Dict[str, Dict]:
@@ -93,39 +94,57 @@ class BookOrganizer:
                 # 連番ファイルがない場合はスキップ
                 continue
             
-            if len(numbered_files) < 2:
+            # 雑誌モードでは連番ファイル数の制限を緩和
+            if not self.magazine_mode and len(numbered_files) < 2:
                 raise ValueError(f"タイトル '{title}': 連番ファイルが2つ以上必要です")
             
             # タイトル用ディレクトリのパス
             title_dir = self.target_dir / title
             
-            # 表紙ファイル（最後から-1の連番ファイル）を001に
-            cover_file = numbered_files[-2]  # 最後から-1のファイルが表紙
-            cover_new_name = title_dir / f"{title}_001{cover_file.suffix}"
-            rename_plan.append((cover_file, cover_new_name, title))
-            
-            # タイトルのみファイルを002に（表紙の次のページ）
-            if title_only_file:
-                title_new_name = title_dir / f"{title}_002{title_only_file.suffix}"
-                rename_plan.append((title_only_file, title_new_name, title))
-            
-            # 既存の連番ファイルを調整
-            start_num = 3 if title_only_file else 2  # タイトルファイルがある場合は003から、ない場合は002から
-            
-            for i, current_file in enumerate(numbered_files):
-                if current_file == cover_file:  # 表紙になるファイルはスキップ
-                    continue
-                    
-                if i < len(numbered_files) - 2:  # 表紙より前のファイル
-                    new_num = i + start_num
-                    new_name = title_dir / f"{title}_{new_num:03d}{current_file.suffix}"
-                    rename_plan.append((current_file, new_name, title))
-                else:  # 最後のファイル（元の027など）
-                    # 表紙より前のファイル数を計算して適切な番号を付ける
-                    files_before_cover = len(numbered_files) - 2
-                    new_num = files_before_cover + start_num
-                    new_name = title_dir / f"{title}_{new_num:03d}{current_file.suffix}"
-                    rename_plan.append((current_file, new_name, title))
+            if self.magazine_mode:
+                # 雑誌モード: 表紙なしで単純に連番
+                current_num = 1
+                
+                # タイトルファイルを001に
+                if title_only_file:
+                    title_new_name = title_dir / f"{title}_001{title_only_file.suffix}"
+                    rename_plan.append((title_only_file, title_new_name, title))
+                    current_num = 2
+                
+                # 連番ファイルを順番に
+                for numbered_file in numbered_files:
+                    new_name = title_dir / f"{title}_{current_num:03d}{numbered_file.suffix}"
+                    rename_plan.append((numbered_file, new_name, title))
+                    current_num += 1
+            else:
+                # 従来モード: 表紙あり
+                # 表紙ファイル（最後から-1の連番ファイル）を001に
+                cover_file = numbered_files[-2]  # 最後から-1のファイルが表紙
+                cover_new_name = title_dir / f"{title}_001{cover_file.suffix}"
+                rename_plan.append((cover_file, cover_new_name, title))
+                
+                # タイトルのみファイルを002に（表紙の次のページ）
+                if title_only_file:
+                    title_new_name = title_dir / f"{title}_002{title_only_file.suffix}"
+                    rename_plan.append((title_only_file, title_new_name, title))
+                
+                # 既存の連番ファイルを調整
+                start_num = 3 if title_only_file else 2  # タイトルファイルがある場合は003から、ない場合は002から
+                
+                for i, current_file in enumerate(numbered_files):
+                    if current_file == cover_file:  # 表紙になるファイルはスキップ
+                        continue
+                        
+                    if i < len(numbered_files) - 2:  # 表紙より前のファイル
+                        new_num = i + start_num
+                        new_name = title_dir / f"{title}_{new_num:03d}{current_file.suffix}"
+                        rename_plan.append((current_file, new_name, title))
+                    else:  # 最後のファイル（元の027など）
+                        # 表紙より前のファイル数を計算して適切な番号を付ける
+                        files_before_cover = len(numbered_files) - 2
+                        new_num = files_before_cover + start_num
+                        new_name = title_dir / f"{title}_{new_num:03d}{current_file.suffix}"
+                        rename_plan.append((current_file, new_name, title))
         
         return rename_plan
     
@@ -335,6 +354,7 @@ def main():
   book-organizer --dry-run ./book        # プレビューのみ（実行しない）
   book-organizer --auto ./book           # 確認なしで自動実行
   book-organizer --cbz ./book            # 整理後にCBZファイルを作成
+  book-organizer --magazine ./magazine   # 雑誌切り抜きモード
   book-organizer --to-cbz ./manga_dir    # 指定ディレクトリをCBZに変換
         """
     )
@@ -371,6 +391,12 @@ def main():
     )
     
     parser.add_argument(
+        '--magazine',
+        action='store_true',
+        help='雑誌切り抜きモード（裏表紙なしで最初から連番）'
+    )
+    
+    parser.add_argument(
         '--version',
         action='version',
         version='%(prog)s 0.1.0'
@@ -392,7 +418,8 @@ def main():
             target_dir=args.directory,
             dry_run=args.dry_run,
             auto=args.auto,
-            create_cbz=args.cbz
+            create_cbz=args.cbz,
+            magazine_mode=args.magazine
         )
         
         success = organizer.run()
