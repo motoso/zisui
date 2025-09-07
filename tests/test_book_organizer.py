@@ -152,8 +152,9 @@ class TestBookOrganizer:
         """基本的なリネームプランのテスト"""
         files = [
             "manga.jpg",  # タイトル -> 002
-            "manga_001.jpg",  # -> 003 (このファイルは表紙より前なので003になる)
-            "manga_002.jpg",  # -> 001 (表紙、最後から2番目のファイル)
+            "manga_001.jpg",  # -> 003 (最初のファイル)
+            "manga_002.jpg",  # -> 001 (表紙、numbered_files[-2])
+            "manga_003.jpg",  # -> 004 (最後のファイル、numbered_files[-1])
         ]
         self.create_test_files(files)
 
@@ -161,12 +162,12 @@ class TestBookOrganizer:
         plan = organizer.generate_rename_plan()
 
         # プランの内容を確認
-        assert len(plan) == 3
+        assert len(plan) == 4
 
-        # 表紙ファイル（manga_001.jpg が表紙になる、最後から2番目）
-        # ソートされた状態で: [manga_001.jpg, manga_002.jpg]
-        # 最後から2番目は manga_001.jpg なので、これが001になる
-        cover_plan = next((p for p in plan if p[0].name == "manga_001.jpg"), None)
+        # 表紙ファイル（numbered_files[-2] = manga_002.jpg が表紙になる）
+        # ソートされた状態で: [manga_001.jpg, manga_002.jpg, manga_003.jpg]
+        # numbered_files[-2] = manga_002.jpg なので、これが001になる
+        cover_plan = next((p for p in plan if p[0].name == "manga_002.jpg"), None)
         assert cover_plan is not None
         assert "manga_001.jpg" in str(cover_plan[1])
 
@@ -175,10 +176,15 @@ class TestBookOrganizer:
         assert title_plan is not None
         assert "manga_002.jpg" in str(title_plan[1])
 
-        # 最後のファイル（manga_002.jpg -> manga_003）
-        numbered_plan = next((p for p in plan if p[0].name == "manga_002.jpg"), None)
-        assert numbered_plan is not None
-        assert "manga_003.jpg" in str(numbered_plan[1])
+        # 最初のファイル（manga_001.jpg -> manga_003）
+        first_plan = next((p for p in plan if p[0].name == "manga_001.jpg"), None)
+        assert first_plan is not None
+        assert "manga_003.jpg" in str(first_plan[1])
+
+        # 最後のファイル（manga_003.jpg -> manga_004）
+        last_plan = next((p for p in plan if p[0].name == "manga_003.jpg"), None)
+        assert last_plan is not None
+        assert "manga_004.jpg" in str(last_plan[1])
 
     def test_generate_rename_plan_without_title_file(self):
         """タイトルファイルなしのテスト"""
