@@ -272,8 +272,12 @@ class BookOrganizer:
                     print("    対処法:")
                     print("      1. ファイルマネージャーで手動削除")
                     print(f"      2. ターミナル: rm -rf '{dir_path}' (Mac/Linux)")
-                    print(f"      3. コマンドプロンプト: rmdir /s '{dir_path}' (Windows)")
-                    print("    注意: このディレクトリが残っていても次回実行には影響ありません")
+                    print(
+                        f"      3. コマンドプロンプト: rmdir /s '{dir_path}' (Windows)"
+                    )
+                    print(
+                        "    注意: このディレクトリが残っていても次回実行には影響ありません"
+                    )
             return False
 
     def run(self) -> bool:
