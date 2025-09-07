@@ -75,7 +75,13 @@ uv run ruff format --check src/ tests/
 
 # 2. 必要に応じてフォーマット適用
 uv run ruff format src/ tests/
+```
 
+## プッシュ前チェックリスト
+
+**必須**: プッシュ前に以下を実行すること
+
+```bash
 # 3. テスト実行
 uv run pytest tests/ -v
 
