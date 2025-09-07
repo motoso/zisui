@@ -6,13 +6,11 @@
 """
 
 import argparse
-import os
 import re
 import sys
-import unicodedata
 import zipfile
 from pathlib import Path
-from typing import List, Tuple, Optional, Dict
+from typing import List, Tuple, Dict
 from collections import defaultdict
 
 
@@ -245,7 +243,7 @@ class BookOrganizer:
                 try:
                     if dir_path.exists() and not any(dir_path.iterdir()):
                         dir_path.rmdir()
-                except:
+                except OSError:
                     pass
             return False
     
