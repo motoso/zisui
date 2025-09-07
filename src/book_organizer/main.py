@@ -265,12 +265,10 @@ class BookOrganizer:
                 try:
                     if dir_path.exists() and not any(dir_path.iterdir()):
                         dir_path.rmdir()
-                except OSError:
-                    # ディレクトリ削除に失敗（ファイルが残っている、権限不足など）
-                    # エラー回復処理中なので、ログ出力して処理継続
-                    print(
-                        f"⚠️  クリーンアップ: ディレクトリを削除できませんでした: {dir_path}"
-                    )
+                except OSError as cleanup_error:
+                    # クリーンアップ失敗は元のエラーより重要度が低いため、
+                    # 詳細をログに残すが処理は継続
+                    print(f"⚠️  クリーンアップ失敗: {dir_path} - {cleanup_error}")
             return False
 
     def run(self) -> bool:
