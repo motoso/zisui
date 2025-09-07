@@ -288,26 +288,35 @@ class TestBookOrganizer:
     def test_generate_rename_plan_magazine_mode_no_title(self):
         """雑誌モード・タイトルファイルなしのテスト"""
         files = [
-            "manga_001.jpg",  # -> 001
-            "manga_002.jpg",  # -> 002
-            "manga_003.jpg",  # -> 003
+            "manga_005.jpg",  # -> 001 (最初のファイル)
+            "manga_010.jpg",  # -> 002
+            "manga_015.jpg",  # -> 003
+            "manga_020.jpg",  # -> 004 (最後のファイル)
         ]
         self.create_test_files(files)
 
         organizer = BookOrganizer(self.temp_dir, magazine_mode=True)
         plan = organizer.generate_rename_plan()
 
-        # 雑誌モードでは単純に順番通り
-        assert len(plan) == 3
+        # 雑誌モードでは単純に順番通りにリネーム
+        assert len(plan) == 4
 
-        plan_1 = next((p for p in plan if p[0].name == "manga_001.jpg"), None)
+        # ソート順で最初のファイル（manga_005.jpg）が001になる
+        plan_1 = next((p for p in plan if p[0].name == "manga_005.jpg"), None)
         assert plan_1 is not None
         assert "manga_001.jpg" in str(plan_1[1])
 
-        plan_2 = next((p for p in plan if p[0].name == "manga_002.jpg"), None)
+        # 2番目のファイル（manga_010.jpg）が002になる
+        plan_2 = next((p for p in plan if p[0].name == "manga_010.jpg"), None)
         assert plan_2 is not None
         assert "manga_002.jpg" in str(plan_2[1])
 
-        plan_3 = next((p for p in plan if p[0].name == "manga_003.jpg"), None)
+        # 3番目のファイル（manga_015.jpg）が003になる
+        plan_3 = next((p for p in plan if p[0].name == "manga_015.jpg"), None)
         assert plan_3 is not None
         assert "manga_003.jpg" in str(plan_3[1])
+
+        # 4番目のファイル（manga_020.jpg）が004になる
+        plan_4 = next((p for p in plan if p[0].name == "manga_020.jpg"), None)
+        assert plan_4 is not None
+        assert "manga_004.jpg" in str(plan_4[1])
