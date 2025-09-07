@@ -47,4 +47,6 @@ python_functions = ["test_*"]
 dev = [
     "pytest>=8.3.5",
     "pytest-cov>=5.0.0",
+    "ruff>=0.1.0",
+    "black>=23.0.0",
 ]

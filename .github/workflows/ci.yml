@@ -58,7 +58,6 @@ jobs:
     - name: Install dependencies
       run: |
         uv sync --dev
-        uv add --dev ruff black
 
     - name: Run ruff (linter)
       run: |
@@ -67,10 +66,6 @@ jobs:
     - name: Run ruff (formatter check)
       run: |
         uv run ruff format --check src/ tests/
-
-    - name: Run black (formatter check)
-      run: |
-        uv run black --check src/ tests/
 
   package:
     runs-on: ubuntu-latest
@@ -85,6 +80,10 @@ jobs:
 
     - name: Set up Python
       run: uv python install 3.12
+
+    - name: Create virtual environment
+      run: |
+        uv sync
 
     - name: Build package
       run: |
