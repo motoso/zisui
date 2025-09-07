@@ -63,3 +63,24 @@ Kent BeckのTDDプロセスに従って開発：
 3. **Refactor**: コードをリファクタリングする
 
 新機能追加時は必ずテストファーストで開発すること。
+
+## コミット前チェックリスト
+
+**必須**: コミット前に以下を実行すること
+
+```bash
+# 1. リント・フォーマットチェック
+uv run ruff check src/ tests/
+uv run ruff format --check src/ tests/
+
+# 2. 必要に応じてフォーマット適用
+uv run ruff format src/ tests/
+
+# 3. テスト実行
+uv run pytest tests/ -v
+
+# 4. カバレッジ付きテスト（CI と同じ）
+uv run pytest tests/ -v --cov=book_organizer --cov-report=term-missing
+```
+
+**理由**: CIと同じチェックをローカルで行うことで、CI失敗を防ぐ
