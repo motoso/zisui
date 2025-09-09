@@ -18,6 +18,7 @@ class BookOrganizer:
     """本ファイル整理クラス"""
 
     SUPPORTED_EXTENSIONS = {".jpg", ".jpeg", ".png"}
+    NUMBERED_FILE_PATTERN = r"_\d+(?:_\d+)?$"
 
     def __init__(
         self,
@@ -57,10 +58,10 @@ class BookOrganizer:
         for file_path in all_files:
             stem = file_path.stem
 
-            # 連番ファイルかチェック（_数字で終わる）
-            if re.search(r"_\d+$", stem):
+            # 連番ファイルかチェック（_数字で終わるか、_数字_数字で終わる）
+            if re.search(self.NUMBERED_FILE_PATTERN, stem):
                 # タイトル部分を抽出
-                title = re.sub(r"_\d+$", "", stem)
+                title = re.sub(self.NUMBERED_FILE_PATTERN, "", stem)
                 file_groups[title]["numbered"].append(file_path)
             else:
                 # タイトルのみファイル
