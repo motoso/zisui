@@ -3,7 +3,6 @@
 番号バリエーション機能のテスト
 """
 
-import pytest
 import tempfile
 import shutil
 from pathlib import Path
@@ -34,11 +33,11 @@ class TestNumberedVariants:
     def test_analyze_files_with_numbered_variants(self):
         """000_1, 000_2のような番号バリエーションファイルの分析テスト"""
         files = [
-            "manga_000.jpg",    # 000
+            "manga_000.jpg",  # 000
             "manga_000_1.jpg",  # 000のバリエーション1
             "manga_000_2.jpg",  # 000のバリエーション2
-            "manga_001.jpg",    # 001
-            "manga_002.jpg",    # 002
+            "manga_001.jpg",  # 001
+            "manga_002.jpg",  # 002
         ]
         self.create_test_files(files)
 
@@ -63,11 +62,11 @@ class TestNumberedVariants:
     def test_generate_rename_plan_with_numbered_variants(self):
         """000_1, 000_2のような番号バリエーションファイルのリネームプランテスト"""
         files = [
-            "manga_000.jpg",    # -> 002 (最初のファイル)
+            "manga_000.jpg",  # -> 002 (最初のファイル)
             "manga_000_1.jpg",  # -> 003 (000のバリエーション1、000の次)
             "manga_000_2.jpg",  # -> 004 (000のバリエーション2、000_1の次)
-            "manga_001.jpg",    # -> 001 (表紙、最後から2番目)
-            "manga_002.jpg",    # -> 005 (最後のファイル)
+            "manga_001.jpg",  # -> 001 (表紙、最後から2番目)
+            "manga_002.jpg",  # -> 005 (最後のファイル)
         ]
         self.create_test_files(files)
 
